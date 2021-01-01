@@ -57,6 +57,14 @@ Remember when I mentioned in the previous section about taking note of the fixed
     first_page_txns_raw = first_page_text.partition("NEW TRANSACTIONS JEROME KO JIA JIN")[2]
     print(first_page_txns_raw)`
 
+{% highlight ruby %}
+with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
+    first_page = pdf.pages[0]
+    first_page_text = first_page.extract_text()
+    first_page_txns_raw = first_page_text.partition("NEW TRANSACTIONS JEROME KO JIA JIN")[2]
+    print(first_page_txns_raw)
+{% endhighlight %}
+
 I obtained the following:
 
 ![_config.yml]({{ site.baseurl }}/images/parsed_DBS_fp.png)
