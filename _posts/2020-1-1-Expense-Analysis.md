@@ -47,3 +47,4 @@ Subsequent pages are irrelevant in this case, as all my transactions are kept wi
 Keeping these in mind will tremendously help us in our next data processing stage.
 
 ## Transaction Extraction
+Stopped.
