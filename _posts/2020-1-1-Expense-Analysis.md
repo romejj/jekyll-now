@@ -12,7 +12,7 @@ This is the very first thought that hit me when I decided to diligently track my
 
 ## Outline
 
-We can break down the problem statement into multiple mini problems. Doing so will ensure proper planning and execution of each step, while remaining focused on what we want at the end of this project:  
+We can break down the problem statement into multiple mini problems. Doing so will ensure proper planning and execution of each step, while remaining focused on what we want to achieve at the end of this project:  
 
 1. PDF exploration of different bank statements
 2. Write a script that automatically extracts and stores transactions from parsed PDF files
@@ -47,4 +47,11 @@ Subsequent pages are irrelevant in this case, as all my transactions are kept wi
 Keeping these in mind will tremendously help us in our next data processing stage.
 
 ## Transaction Extraction
-Stopped.
+We need to find a suitable library that is able to read PDF pages and store them as objects. *pdfplumber* (well documented [here](https://github.com/jsvine/pdfplumber)) serves this purpose well; it not only stores them as objects but also provides a range of useful operations that can be executed on these objects to serve this project's objectives.
+
+`with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
+    first_page = pdf.pages[0]
+    first_page_text = first_page.extract_text()
+    first_page_txns_raw = first_page_text.partition("NEW TRANSACTIONS JEROME KO JIA JIN")[2]
+    print(first_page_txns_raw)`
+
