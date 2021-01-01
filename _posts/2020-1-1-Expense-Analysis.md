@@ -49,9 +49,19 @@ Keeping these in mind will tremendously help us in our next data processing stag
 ## Transaction Extraction
 We need to find a suitable library that is able to read PDF pages and store them as objects. *pdfplumber* (well documented [here](https://github.com/jsvine/pdfplumber)) serves this purpose well; it not only stores them as objects but also provides a range of useful operations that can be executed on these objects to serve this project's objectives.
 
+Remember when I mentioned in the previous section about taking note of the fixed headers and footers? It comes in handy here; when I parsed the first page of the sample DBS statement and then partitioned based on the fixed header,
+
 `with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
     first_page = pdf.pages[0]
     first_page_text = first_page.extract_text()
     first_page_txns_raw = first_page_text.partition("NEW TRANSACTIONS JEROME KO JIA JIN")[2]
     print(first_page_txns_raw)`
 
+I obtained the following:
+![_config.yml]({{ site.baseurl }}/images/parsed_DBS_fp.png)
+
+So far so good! With just a few blocks of code we have managed to store transactions in a string. However, we want to accomplish more here. As we can see the transactions are still not very clean, and we should also compartmentalize each transaction according to dates, transaction description, and transactional amount so we can then easily write them into a spreadsheet later. Storing the transactions as a list will help accomplish this. We first examine whitespace characters within the string to see how we can split the string accordingly:
+`print(repr(first_page_txns_raw))`
+![_config.yml]({{ site.baseurl }}/images/print(repr(first_page_txns_raw)).png)
+
+<!-- Talk about the diff functions -->
