@@ -51,12 +51,6 @@ We need to find a suitable library that is able to read PDF pages and store them
 
 Remember when I mentioned in the previous section about taking note of the fixed headers and footers? It comes in handy here; when I parsed the first page of the sample DBS statement and then partitioned based on the fixed header,
 
-`with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
-    first_page = pdf.pages[0]
-    first_page_text = first_page.extract_text()
-    first_page_txns_raw = first_page_text.partition("NEW TRANSACTIONS JEROME KO JIA JIN")[2]
-    print(first_page_txns_raw)`
-
 {% highlight ruby %}
 with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
     first_page = pdf.pages[0]
@@ -71,7 +65,9 @@ I obtained the following:
 
 So far so good! With just a few blocks of code we have managed to store transactions in a string. However, we want to accomplish more here. As we can see the transactions are still not very clean, and we should also compartmentalize each transaction according to dates, transaction description, and transactional amount so we can then easily write them into a spreadsheet later. Storing the transactions as a list will help accomplish this. We first examine whitespace characters within the string to see how we can split the string accordingly:
 
-`print(repr(first_page_txns_raw))`
+{% highlight ruby %}
+print(repr(first_page_txns_raw))
+{% endhighlight %}
 
 ![_config.yml]({{ site.baseurl }}/images/print(repr(first_page_txns_raw)).png)
 
