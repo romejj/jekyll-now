@@ -27,16 +27,16 @@ Caveats:
 
 Now, let us take a look at some sample PDF statements. In this project I shall only focus on statements from DBS (The Development Bank of Singapore Limited) and UOB (United Overseas Bank) because well, I only hold accounts in those banks! Fortunately, this can be generalized to other bank statements as the fundamental concepts are essentially the same. 
 
-*First page of DBS:*
+***First page of DBS:***
 ![_config.yml]({{ site.baseurl }}/images/DBS_statement_ex2.png)
 
-*Second page of DBS:*
+***Second page of DBS:***
 ![_config.yml]({{ site.baseurl }}/images/DBS_statement_ex3.png)
 
-*First page of UOB:*
+***First page of UOB:***
 ![_config.yml]({{ site.baseurl }}/images/UOB_statement_ex1.png)
 
-*Second page of UOB:*
+***Second page of UOB:***
 ![_config.yml]({{ site.baseurl }}/images/UOB_statement_ex2.png)
 
 Subsequent pages are irrelevant in this case, as all my transactions are kept within the first two pages of each bank's statement. From examining the statements above we can deduce that transactions are always wrapped within fixed headers and footers:
