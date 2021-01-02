@@ -121,8 +121,52 @@ def filter_legitimate_txns(txns):
     txns_double_split = [txn.split() for txn in txns_split_no_ref]
     
     return [txn for txn in txns_double_split if len(txn) >= 4]
+
+pprint.pprint(first_page_txns_raw)
 {% endhighlight %}
 
+![_config.yml]({{ site.baseurl }}/images/UOB_clean_fp_txns.png)
+
+So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched word so we can partition the transactions later.
+
+{% highlight ruby %}
+sub_total_regex = re.compile("SUB.TOTAL")
+
+def contains_sub_total(page):
+    if sub_total_regex.search(page):
+        return True, sub_total_regex.search(page).group()
+        
+    else:
+        return False, None
+{% endhighlight %}
+
+<!-- Edit here -->
+The idea is to call this function on each page of an e-statement so we 
+
+ have to process subsequent pages if previous page already contains sub-total.
+
+{% highlight ruby %}
+def dbs_txn_trimming(page_text, s):
+    txns_raw = page_text.partition(s)[2]
+    
+    if contains_sub_total(txns_raw):
+        txns_raw = txns_raw.partition("SUB-TOTAL")[0]
+        
+    return txns_raw
+{% endhighlight %}
+
+{% highlight ruby %}
+def process_txn_amt(txns):
+    for txn in txns:
+        while not txn[-1].replace(".","",1).replace(",","",1).isdigit() and not "CR" in txn[-1]:  
+            txn.pop(-1)  # remove if last item in each txn is not an amt
+    
+        if "CR" in txn[-1]:  # if amt contains CR
+            txn[-1] = txn[-1].replace("CR","",1)  # remove CR
+            txn[-1] = "-" + txn[-1]  # reverse sign
+            
+    return txns
+{% endhighlight %}
 <!-- Talk about detecting where txns end -->
 
 <!-- Talk about the diff functions -->
