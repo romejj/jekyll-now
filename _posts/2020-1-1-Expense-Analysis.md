@@ -59,7 +59,7 @@ with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
     print(first_page_txns_raw)
 {% endhighlight %}
 
-I obtained the following:
+I obtained the following (for DBS and UOB, respectively):
 
 ![_config.yml]({{ site.baseurl }}/images/parsed_DBS_fp.png)
 
@@ -70,5 +70,59 @@ print(repr(first_page_txns_raw))
 {% endhighlight %}
 
 ![_config.yml]({{ site.baseurl }}/images/print(repr(first_page_txns_raw)).png)
+
+Nice! It looks like the transactions can be neatly split by the newline character, returning a list with each element representing a single transaction. Each element can then be further separated to dates, description and amount by spaces. The result is a list within a list.
+
+{% highlight ruby %}
+def filter_legitimate_txns(txns):
+    txns_split = txns.split("\n")
+    txns_double_split = [txn.split() for txn in txns_split]
+    
+    return [txn for txn in txns_double_split if len(txn) >= 4]
+
+pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
+{% endhighlight %}
+
+![_config.yml]({{ site.baseurl }}/images/list_split.png)
+
+The last step involves cleaning up the transactions in the list. Since each transaction is defined by its dates, description, and amount, we tweak the *filter_legitimate_txns* function to remove any element with a length of less than 4.
+
+{% highlight ruby %}
+def filter_legitimate_txns(txns):
+    txns_split = txns.split("\n")
+    txns_double_split = [txn.split() for txn in txns_split_no_ref]
+    
+    return [txn for txn in txns_double_split if len(txn) >= 4]
+
+pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
+{% endhighlight %}
+
+![_config.yml]({{ site.baseurl }}/images/DBS_clean_fp_txns.png)
+
+The process is almost the same for UOB's sample statement as it's fairly similar to DBS's, apart from two major differences. Firstly, 
+there's an extra footnote that lies at the end of every page, so transactions are wrapped between the fixed header "PREVIOUS BALANCE" and the footnote (that starts with "Pleasenote"). Therefore, we can extract the transactions by taking whatever that comes between the header and footnote, with the following code:
+
+{% highlight ruby %}
+with pdfplumber.open(uob_source_dir / uob_pdf_file) as pdf:
+    first_page = pdf.pages[0]
+    first_page_text = first_page.extract_text()
+    first_page_txns_raw = first_page_text.partition("PREVIOUS BALANCE")[2].partition("Pleasenote")[0]
+    print(first_page_txns_raw)
+{% endhighlight %}
+
+![_config.yml]({{ site.baseurl }}/images/parsed_UOB_fp.png)
+
+Secondly, each transaction is tagged to a unique reference number and that number appears directly below the associated transaction. We are not interested in capturing these reference numbers as they serve no purpose, so we will further edit the *filter_legitimate_txns* function to accommodate for this.
+
+{% highlight ruby %}
+def filter_legitimate_txns(txns):
+    txns_split = txns.split("\n")
+    txns_split_no_ref = [txn for txn in txns_split if "Ref No." not in txn] 
+    txns_double_split = [txn.split() for txn in txns_split_no_ref]
+    
+    return [txn for txn in txns_double_split if len(txn) >= 4]
+{% endhighlight %}
+
+<!-- Talk about detecting where txns end -->
 
 <!-- Talk about the diff functions -->
