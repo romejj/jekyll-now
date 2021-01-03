@@ -127,7 +127,7 @@ pprint.pprint(first_page_txns_raw)
 
 ![_config.yml]({{ site.baseurl }}/images/UOB_clean_fp_txns.png)
 
-So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched word so we can partition the transactions later.
+So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched word so we can partition the transactions in *txn_trimming* function (so far we've already partitioned the transactions in the first page of each statement, and we're generalizing this operation in this function where it aims to partition transactions in all pages).
 
 {% highlight ruby %}
 sub_total_regex = re.compile("SUB.TOTAL")
@@ -140,20 +140,20 @@ def contains_sub_total(page):
         return False, None
 {% endhighlight %}
 
-<!-- Edit here -->
-The idea is to call this function on each page of an e-statement so we 
-
- have to process subsequent pages if previous page already contains sub-total.
-
 {% highlight ruby %}
-def dbs_txn_trimming(page_text, s):
+def txn_trimming(page_text, s):
     txns_raw = page_text.partition(s)[2]
     
-    if contains_sub_total(txns_raw):
-        txns_raw = txns_raw.partition("SUB-TOTAL")[0]
+    sub_total_bool, sub_total_content = contains_sub_total(txns_raw)
+    
+    if sub_total_bool:
+        return txns_raw.partition(sub_total_content)[0]
         
-    return txns_raw
+    else:
+        return txns_raw.partition("Pleasenote")[0]
 {% endhighlight %}
+
+With these functions we are now able to easily extract and process every transaction in all statements. However, there's a final step that we can implement to make our lives easier when we analyze the amounts later. If you look closely at the extracted transactions you would notice that some amounts are suffixed with the letters "CR". These relate to cash rebates given out by the banks because of several reasons like store refunds or monthly credit card rebates. We want the transactional amounts to only store floating-point numbers, so we need to remove the CR while adding a negative sign in front to signify a decrease in expense (instead of an increase). The following function can do this easily:
 
 {% highlight ruby %}
 def process_txn_amt(txns):
@@ -167,6 +167,11 @@ def process_txn_amt(txns):
             
     return txns
 {% endhighlight %}
+
+When a list of transactions is passed as an argument, the function will check if each transaction ends with either a floating-point number or the letters "CR". If it doesn't, it removes the last characters until either condition is satisfied. Furthermore, for those transactions that end with the letters "CR", the letters are removed and a negative sign is added in front.
+
+My source directory contains the entire 2019 statements from both DBS and UOB. Let's try running these functions to see if they work out fine:
+
 <!-- Talk about detecting where txns end -->
 
 <!-- Talk about the diff functions -->
