@@ -88,7 +88,7 @@ The last step involves cleaning up the transactions in the list. Since each tran
 {% highlight ruby %}
 def filter_legitimate_txns(txns):
     txns_split = txns.split("\n")
-    txns_double_split = [txn.split() for txn in txns_split_no_ref]
+    txns_double_split = [txn.split() for txn in txns_split]
     
     return [txn for txn in txns_double_split if len(txn) >= 4]
 
@@ -173,18 +173,21 @@ My source directory contains the entire 2019 statements from both DBS and UOB. P
 {% highlight ruby %}
 all_txns = []
 
-with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
-    for i in range(2):  # txns only extend up to 2nd page
-            page_text = pdf.pages[i].extract_text()
-            all_txns_in_first = contains_sub_total(pdf.pages[0].extract_text())
-        
-            if i == 0:
-                txns_raw = txn_trimming(page_text, "NEW TRANSACTIONS JEROME KO JIA JIN")   
-                all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
-        
-            elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
-                txns_raw = txn_trimming(page_text, "2 of 3")
-                all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+for folder, subfolder, pdf_files in os.walk(dbs_source_dir):
+    for pdf_file in pdf_files:
+
+        with pdfplumber.open(dbs_source_dir / pdf_file) as pdf:
+            for i in range(2):  # txns only extend up to 2nd page
+                    page_text = pdf.pages[i].extract_text()
+                    all_txns_in_first = contains_sub_total(pdf.pages[0].extract_text())
+
+                    if i == 0:
+                        txns_raw = txn_trimming(page_text, "NEW TRANSACTIONS JEROME KO JIA JIN")
+                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+
+                    elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
+                        txns_raw = txn_trimming(page_text, "2 of 3")
+                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
 for folder, subfolder, pdf_files in os.walk(uob_source_dir):
     for pdf_file in pdf_files:
