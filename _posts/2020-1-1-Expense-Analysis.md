@@ -59,7 +59,7 @@ with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
     print(first_page_txns_raw)
 {% endhighlight %}
 
-I obtained the following (for DBS and UOB, respectively):
+I obtained the following:
 
 ![_config.yml]({{ site.baseurl }}/images/parsed_DBS_fp.png)
 
@@ -77,8 +77,6 @@ Nice! It looks like the transactions can be neatly split by the newline characte
 def filter_legitimate_txns(txns):
     txns_split = txns.split("\n")
     txns_double_split = [txn.split() for txn in txns_split]
-    
-    return [txn for txn in txns_double_split if len(txn) >= 4]
 
 pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
 {% endhighlight %}
@@ -127,7 +125,7 @@ pprint.pprint(first_page_txns_raw)
 
 ![_config.yml]({{ site.baseurl }}/images/UOB_clean_fp_txns.png)
 
-So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched word so we can partition the transactions in *txn_trimming* function (so far we've already partitioned the transactions in the first page of each statement, and we're generalizing this operation in this function where it aims to partition transactions in all pages).
+So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched words so we can partition the transactions in *txn_trimming* function (so far we've already partitioned the transactions in the first page of each statement, and we're generalizing this operation in this function where it aims to partition transactions in all pages).
 
 {% highlight ruby %}
 sub_total_regex = re.compile("SUB.TOTAL")
@@ -159,19 +157,50 @@ With these functions we are now able to easily extract and process every transac
 def process_txn_amt(txns):
     for txn in txns:
         while not txn[-1].replace(".","",1).replace(",","",1).isdigit() and not "CR" in txn[-1]:  
-            txn.pop(-1)  # remove if last item in each txn is not an amt
+            txn.pop(-1)
     
-        if "CR" in txn[-1]:  # if amt contains CR
-            txn[-1] = txn[-1].replace("CR","",1)  # remove CR
-            txn[-1] = "-" + txn[-1]  # reverse sign
+        if "CR" in txn[-1]:
+            txn[-1] = txn[-1].replace("CR","",1)
+            txn[-1] = "-" + txn[-1]
             
     return txns
 {% endhighlight %}
 
 When a list of transactions is passed as an argument, the function will check if each transaction ends with either a floating-point number or the letters "CR". If it doesn't, it removes the last characters until either condition is satisfied. Furthermore, for those transactions that end with the letters "CR", the letters are removed and a negative sign is added in front.
 
-My source directory contains the entire 2019 statements from both DBS and UOB. Let's try running these functions to see if they work out fine:
+My source directory contains the entire 2019 statements from both DBS and UOB. Putting all the pieces together, running the above codes on all the files will give all 2019 transactions:
 
-<!-- Talk about detecting where txns end -->
+{% highlight ruby %}
+all_txns = []
 
-<!-- Talk about the diff functions -->
+with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
+    for i in range(2):  # txns only extend up to 2nd page
+            page_text = pdf.pages[i].extract_text()
+            all_txns_in_first = contains_sub_total(pdf.pages[0].extract_text())
+        
+            if i == 0:
+                txns_raw = txn_trimming(page_text, "NEW TRANSACTIONS JEROME KO JIA JIN")   
+                all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+        
+            elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
+                txns_raw = txn_trimming(page_text, "2 of 3")
+                all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+
+for folder, subfolder, pdf_files in os.walk(uob_source_dir):
+    for pdf_file in pdf_files:
+
+        with pdfplumber.open(uob_source_dir / pdf_file) as pdf:
+            for i in range(2):  # txns only extend up to 2nd page
+                    page_text = pdf.pages[i].extract_text()
+                    all_txns_in_first = contains_sub_total(pdf.pages[0].extract_text())
+
+                    if i == 0:
+                        txns_raw = txn_trimming(page_text, "PREVIOUS BALANCE")
+                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+
+                    elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
+                        txns_raw = txn_trimming(page_text, "Date Date SGD")
+                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+{% endhighlight %}
+
+## Load Into .csv
