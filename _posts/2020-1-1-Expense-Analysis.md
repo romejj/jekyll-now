@@ -191,13 +191,13 @@ for folder, subfolder, pdf_files in os.walk(dbs_source_dir):
         with pdfplumber.open(dbs_source_dir / pdf_file) as pdf:
             for i in range(2):  # txns only extend up to 2nd page
                     page_text = pdf.pages[i].extract_text()
-                    all_txns_in_first = contains_sub_total(pdf.pages[0].extract_text())
+                    sub_total_bool, sub_total_content = contains_sub_total(pdf.pages[0].extract_text())
 
                     if i == 0:
                         txns_raw = txn_trimming(page_text, "NEW TRANSACTIONS JEROME KO JIA JIN")
                         dbs_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
-                    elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
+                    elif i == 1 and not sub_total_bool:  # if txns extend to 2nd page
                         txns_raw = txn_trimming(page_text, "2 of 3")
                         dbs_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
@@ -207,13 +207,13 @@ for folder, subfolder, pdf_files in os.walk(uob_source_dir):
         with pdfplumber.open(uob_source_dir / pdf_file) as pdf:
             for i in range(2):  # txns only extend up to 2nd page
                     page_text = pdf.pages[i].extract_text()
-                    all_txns_in_first = contains_sub_total(pdf.pages[0].extract_text())
+                    sub_total_bool, sub_total_content = contains_sub_total(pdf.pages[0].extract_text())
 
                     if i == 0:
                         txns_raw = txn_trimming(page_text, "PREVIOUS BALANCE")
                         uob_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
-                    elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
+                    elif i == 1 and not sub_total_bool:  # if txns extend to 2nd page
                         txns_raw = txn_trimming(page_text, "Date Date SGD")
                         uob_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
