@@ -97,8 +97,7 @@ pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
 
 ![_config.yml]({{ site.baseurl }}/images/DBS_clean_fp_txns.png)
 
-The process is almost the same for UOB's sample statement as it's fairly similar to DBS's, apart from two major differences. Firstly, 
-there's an extra footnote that lies at the end of every page, so transactions are wrapped between the fixed header "PREVIOUS BALANCE" and the footnote (that starts with "Pleasenote"). Therefore, we can extract the transactions by taking whatever that comes between the header and footnote, with the following code:
+The process is almost the same for UOB's sample statement as it's fairly similar to DBS's, apart from three major differences. Firstly, there's an extra footnote that lies at the end of every page, so transactions are wrapped between the fixed header "PREVIOUS BALANCE" and the footnote (that starts with "Pleasenote"). Therefore, we can extract the transactions by taking whatever that comes between the header and footnote, with the following code:
 
 {% highlight ruby %}
 with pdfplumber.open(uob_source_dir / uob_pdf_file) as pdf:
@@ -120,10 +119,22 @@ def filter_legitimate_txns(txns):
     
     return [txn for txn in txns_double_split if len(txn) >= 4]
 
-pprint.pprint(first_page_txns_raw)
+pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
 {% endhighlight %}
 
 ![_config.yml]({{ site.baseurl }}/images/UOB_clean_fp_txns.png)
+
+Last but not least, UOB posts each transaction in two dates; one being the post date and the other being the transaction date. The post dates will be removed as we're only concerned with the latter.
+
+{% highlight ruby %}
+first_page_txns_processed = filter_legitimate_txns(first_page_txns_raw)
+for txn in first_page_txns_processed:
+    del txn[0:2]
+
+pprint.pprint(first_page_txns_processed)
+{% endhighlight %}
+
+![_config.yml]({{ site.baseurl }}/images/UOB_processed_fp_txns.png)
 
 So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched words so we can partition the transactions in *txn_trimming* function (so far we've already partitioned the transactions in the first page of each statement, and we're generalizing this operation in this function where it aims to partition transactions in all pages).
 
@@ -171,7 +182,8 @@ When a list of transactions is passed as an argument, the function will check if
 My source directory contains the entire 2019 statements from both DBS and UOB. Putting all the pieces together, running the above codes on all the files will give all 2019 transactions:
 
 {% highlight ruby %}
-all_txns = []
+dbs_all_txns = []
+uob_all_txns = []
 
 for folder, subfolder, pdf_files in os.walk(dbs_source_dir):
     for pdf_file in pdf_files:
@@ -183,11 +195,11 @@ for folder, subfolder, pdf_files in os.walk(dbs_source_dir):
 
                     if i == 0:
                         txns_raw = txn_trimming(page_text, "NEW TRANSACTIONS JEROME KO JIA JIN")
-                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+                        dbs_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
                     elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
                         txns_raw = txn_trimming(page_text, "2 of 3")
-                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+                        dbs_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
 for folder, subfolder, pdf_files in os.walk(uob_source_dir):
     for pdf_file in pdf_files:
@@ -199,11 +211,14 @@ for folder, subfolder, pdf_files in os.walk(uob_source_dir):
 
                     if i == 0:
                         txns_raw = txn_trimming(page_text, "PREVIOUS BALANCE")
-                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+                        uob_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
                     elif i == 1 and not all_txns_in_first:  # if txns extend to 2nd page
                         txns_raw = txn_trimming(page_text, "Date Date SGD")
-                        all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+                        uob_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
+
+all_txns = dbs_all_txns
+all_txns.append(uob_all_txns)
 {% endhighlight %}
 
 ## Load Into .csv
