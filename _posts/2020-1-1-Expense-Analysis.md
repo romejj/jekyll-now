@@ -217,8 +217,36 @@ for folder, subfolder, pdf_files in os.walk(uob_source_dir):
                         txns_raw = txn_trimming(page_text, "Date Date SGD")
                         uob_all_txns.append(process_txn_amt(filter_legitimate_txns(txns_raw)))
 
-all_txns = dbs_all_txns
-all_txns.append(uob_all_txns)
+for monthly_txns in uob_all_txns:
+    for txn in monthly_txns:
+        del txn[0:2]  # remove post dates
+
+all_txns = dbs_all_txns.copy()
+all_txns.extend(uob_all_txns)
+
 {% endhighlight %}
 
-## Load Into .csv
+## Write Into .csv
+
+## Analyze Expenses
+<!-- 
+Talk about budget first
+Check month on month expenditure and count of transactions (on those periods of high txns, do we see high amt too?)
+Check counts of each category per month (interesting to see which months are the most fun by looking at count of entertainment)
+Check highest occurrence for each string
+Cumulative line graph for each category vs benchmark/budget
+Monthly growth rate
+
+Interesting findings:
+1. Seemingly healthy, positive balance: Spent $891 less than total budget; this is not great news esp when one should be saving more during COVID!
+2. Above is bad too because we're not considering non-card transactions - Expense is prob more
+3. Txn freq doesn't correlate to total txn amt; holiday season saw the highest transactional count but amt is fairly stable around monthly average
+4. Breaking budget and expenses down into categorical level proves to be very helpful; even though overall balance is negative we can clearly see that we're spending too much on food; 2x more than allocated budget!
+5. May is the season of spending; inflated because bought a personal Macbook for myself. Perhaps still the best investment made as I've been using it to hone my programming skills
+
+Takeaway:
+1. Try to contain all transactions in cards, so tracking is more accurate
+ -->
+
+<!-- Code can be found here.
+Tableau dashboard can be found here. -->
