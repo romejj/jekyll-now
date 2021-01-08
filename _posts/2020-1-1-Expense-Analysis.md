@@ -41,7 +41,8 @@ Now, let us take a look at some sample PDF statements. In this project I shall o
 
 Subsequent pages are irrelevant in this case, as all my transactions are kept within the first two pages of each bank's statement. From examining the statements above we can deduce that transactions are always wrapped between fixed headers and footers:
 
-*Scenario 1: All transactions are contained within first page*
+*Scenario 1: All transactions are contained within first page:*
+
 | **Bank**            | **DBS**                               | **UOB**            |
 |---------------------|---------------------------------------|--------------------|
 | **1st page header** | "NEW TRANSACTIONS (insert name here)" | "PREVIOUS BALANCE" |
@@ -49,7 +50,8 @@ Subsequent pages are irrelevant in this case, as all my transactions are kept wi
 | **2nd page header** | N/A                                   | N/A                |
 | **2nd page footer** | N/A                                   | N/A                |
 
-*Scenario 2: Transactions are listed in both first page and second page*
+*Scenario 2: Transactions are listed in both first page and second page:*
+
 | **Bank**            | **DBS**                               | **UOB**            |
 |---------------------|---------------------------------------|--------------------|
 | **1st page header** | "NEW TRANSACTIONS (insert name here)" | "PREVIOUS BALANCE" |
