@@ -309,7 +309,7 @@ df_categorized_txns["Category"] = df_categorized_txns.apply(categorize_txns, axi
 
 This part is rather tedious; it requires one to study the underlying data and understand which merchants one tends to gravitate to fulfill most of the purchases in each category. For example, I know that I mainly shop from ecommerce channels such as Lazada and Shopee so those are used in the regex functions. In addition, I've allocated budget for my partner's birthday so the above attempts to classify all 27 Jun transactions as expenses incurred for her birthday.
 
-Writing into a csv file is simple:
+Lastly, the dataframe is written into a csv file to prepare for analysis:
 {% highlight ruby %}
 df_categorized_txns.to_csv(dest_csv / "2020 transactions.csv")
 {% endhighlight %}
