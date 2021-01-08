@@ -194,7 +194,7 @@ def process_txn_amt(txns):
 
 When a list of transactions is passed as an argument, the function will check if each transaction ends with either a floating-point number or the letters "CR". If it doesn't, it removes the last characters until either condition is satisfied. Furthermore, for those transactions that end with the letters "CR", the letters are removed and a negative sign is added in front.
 
-My source directory contains the entire 2019 statements from both DBS and UOB. Putting all the pieces together, running the above codes on all the files will give all 2019 transactions:
+My source directory contains the entire 2020 statements from both DBS and UOB. Putting all the pieces together, running the above codes on all the files will give all 2020 transactions:
 
 {% highlight ruby %}
 dbs_all_txns = []
@@ -239,10 +239,80 @@ for monthly_txns in uob_all_txns:
 all_txns = dbs_all_txns.copy()
 all_txns.extend(uob_all_txns)
 
+categorized_txns = [{"Date": " ".join(txn[0:2]), "Txn Desc": " ".join(txn[2:len(txn)-1]), "Amt": txn[-1]}
+                        for monthly_txns in all_txns 
+                        for txn in monthly_txns]
+
 {% endhighlight %}
 
-## Write Into .csv
+![_config.yml]({{ site.baseurl }}/images/categorized_txns.png)
 
+## Write Into .csv
+The above transactions are first converted into a pandas dataframe to allow for easier further manipulation to the data and subsequent writing into a csv file.
+
+Adding cateogories to each transaction then requires the following code:
+
+{% highlight ruby %}
+# Load into dataframe for further manipulation
+df_categorized_txns = pd.DataFrame(categorized_txns)
+
+# Format date column
+df_categorized_txns["Date"] = df_categorized_txns["Date"] + " 2020"
+
+# Categorizing txns
+shopping = re.compile(r'''.*Shopee(pay)?.*
+                    |.*Lazada.*
+                    |.*Zalora.*
+                    |.*Uniqlo.*
+                    |.*Asos.*
+                    |.*Ghbass.*
+                    |.*Decathlon.*
+                    |.*Amazon.*
+                    |.*Watson.*
+                    |.*Guardian.*''', re.I | re.VERBOSE)
+utilities = re.compile(r".*Liberty Wireless.*|.*Gomo.*", re.I)
+holiday = re.compile(r".*Agoda*.|.*Scoot.*|.*Hotel.*", re.I)
+grooming = re.compile(".*Sultans of shave.*", re.I)
+entertainment = re.compile(r".*GV.*|.*Shaw.*", re.I)
+others = re.compile(r".* Fee.*|.*Charge.*|.*Interest.*|.*Bank.*|.*Rebate.*", re.I)
+
+def categorize_txns(s):
+    if shopping.search(s["Txn Desc"]):  # None if there's no match
+        return "Shopping"
+    
+    elif utilities.search(s["Txn Desc"]):
+        return "Utilities"
+    
+    elif holiday.search(s["Txn Desc"]):
+        return "Holiday"
+    
+    elif grooming.search(s["Txn Desc"]):
+        return "Grooming"
+    
+    elif entertainment.search(s["Txn Desc"]):
+        return "Entertainment"
+    
+    elif others.search(s["Txn Desc"]):
+        return "Others"
+    
+    elif s["Date"] == "27 JUN 2020":
+        return "Birthday"
+    
+    elif s["Date"] == "19 MAR 2020":
+        return "Anniversary"
+    
+    else:
+        return "Food"
+
+df_categorized_txns["Category"] = df_categorized_txns.apply(categorize_txns, axis=1)
+{% endhighlight %}
+
+This part is rather tedious; it requires one to study the underlying data and understand which merchants one tends to gravitate to fulfill most of the purchases in each category. For example, I know that I mainly shop from ecommerce channels such as Lazada and Shopee so those are used in the regex functions. In addition, I've allocated budget for my partner's birthday so the above attempts to classify all 27 Jun transactions as expenses incurred for her birthday.
+
+Writing into a csv file is simple:
+{% highlight ruby %}
+df_categorized_txns.to_csv(dest_csv / "2020 transactions.csv")
+{% endhighlight %}
 ## Analyze Expenses
 <!-- 
 Talk about budget first
