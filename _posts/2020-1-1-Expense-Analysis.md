@@ -42,40 +42,20 @@ Now, let us take a look at some sample PDF statements. In this project I shall o
 Subsequent pages are irrelevant in this case, as all my transactions are kept within the first two pages of each bank's statement. From examining the statements above we can deduce that transactions are always wrapped between fixed headers and footers:
 
 *Scenario 1: All transactions are contained within first page*
-|Bank|DBS|UOB|
-|1st page header|"NEW TRANSACTIONS (insert name here)"|"PREVIOUS BALANCE"|
-|1st page footer|"SUB-TOTAL"|"SUB TOTAL"|
-|2nd page header|N/A|N/A|
-|2nd page footer|N/A|N/A|
+| **Bank**            | **DBS**                               | **UOB**            |
+|---------------------|---------------------------------------|--------------------|
+| **1st page header** | "NEW TRANSACTIONS (insert name here)" | "PREVIOUS BALANCE" |
+| **1st page footer** | "SUB-TOTAL"                           | "SUB TOTAL"        |
+| **2nd page header** | N/A                                   | N/A                |
+| **2nd page footer** | N/A                                   | N/A                |
 
 *Scenario 2: Transactions are listed in both first page and second page*
-|Bank|DBS|UOB|
-|1st page header|"NEW TRANSACTIONS (insert name here)"|"PREVIOUS BALANCE"|
-|1st page footer|No footer|"Pleasenote"|
-|2nd page header|"2 of 3"|"Date Date SGD"|
-|2nd page footer|"SUB-TOTAL"|"SUB TOTAL"|
-
-1. In the case of DBS, 
-    a. If all transactions are housed within the first page:
-
-        i. The first transaction in the first page always starts after "NEW TRANSACTIONS (insert name here)", and the last comes just before "SUB-TOTAL".
-
-        ii. The second page is empty.
-
-    b. If transactions are distributed across first two pages:
-
-        i. First transaction in first page stills starts after "NEW TRANSACTIONS (insert name here)", but the last transaction no longer comes before "SUB-TOTAL", but rather it's just the last string in the page.
-    
-        ii. First transaction in second page starts after "2 of 3", last comes just before "SUB-TOTAL".
-
-2. In the case of UOB, 
-    a. The first transaction always starts after "PREVIOUS BALANCE", while the last always comes just before "SUB TOTAL" (again, if all transactions are housed within the first page). 
-    
-    b. 
-    
-    c. We also need to take note of the footnotes that come in every page of this bank's statements.
-
-
+| **Bank**            | **DBS**                               | **UOB**            |
+|---------------------|---------------------------------------|--------------------|
+| **1st page header** | "NEW TRANSACTIONS (insert name here)" | "PREVIOUS BALANCE" |
+| **1st page footer** | No footer                             | "Pleasenote"       |
+| **2nd page header** | "2 of 3"                              | "Date Date SGD"    |
+| **2nd page footer** | "SUB-TOTAL"                           | "SUB TOTAL"        |
 
 Keeping these in mind will tremendously help us in our next data processing stage.
 
