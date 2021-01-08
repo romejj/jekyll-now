@@ -314,11 +314,9 @@ Lastly, the dataframe is written into a csv file to prepare for analysis:
 df_categorized_txns.to_csv(dest_csv / "2020 transactions.csv")
 {% endhighlight %}
 ## Analyze Expenses
-We finally have a clean dataset to analyze the expenses. The resulting csv file is uploaded in Tableau Public to generate the dashboard [here](https://public.tableau.com/views/2020ExpenseAnalysis/Dashboard1?:language=en&:display_count=y&publish=yes&:origin=viz_share_link).
+We finally have a clean dataset to analyze the expenses. The resulting csv file is uploaded in Tableau Public to generate the dashboard [here](https://public.tableau.com/profile/jerome.ko#!/vizhome/2020ExpenseAnalysis/Dashboard1?publish=yes).
 
 ![_config.yml]({{ site.baseurl }}/images/expense_dashboard.png)
-
-<center><iframe src="https://public.tableau.com/views/2020ExpenseAnalysis/Dashboard1?:language=en&:display_count=y&publish=yes&:origin=viz_share_link" width="100%" height="500" frameborder="0"></iframe></center>
 
 <!-- 
 Talk about budget first
