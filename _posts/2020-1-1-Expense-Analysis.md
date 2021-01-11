@@ -64,7 +64,7 @@ Keeping these in mind will tremendously help us in our next data processing stag
 ## Transaction Extraction
 We need to find a suitable library that is able to read PDF pages and store them as objects. *pdfplumber* (well documented [here](https://github.com/jsvine/pdfplumber)) serves this purpose well; it not only stores them as objects but also provides a range of useful operations that can be executed on these objects to serve this project's objectives.
 
-Remember when I mentioned in the previous section about taking note of the fixed headers and footers? It comes in handy here; when I parsed the first page of the sample DBS statement and then partitioned based on the fixed header,
+Remember when I mentioned in the previous section about taking note of the fixed headers and footers? It comes in handy here; when I parse the first page of the sample DBS statement and then only take whatever that comes after the fixed header,
 
 {% highlight ruby %}
 with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
@@ -74,11 +74,11 @@ with pdfplumber.open(dbs_source_dir / dbs_pdf_file) as pdf:
     print(first_page_txns_raw)
 {% endhighlight %}
 
-I obtained the following:
+I will obtain the following:
 
 ![_config.yml]({{ site.baseurl }}/images/parsed_DBS_fp.png)
 
-So far so good! With just a few blocks of code we have managed to store transactions in a string. However, we want to accomplish more here. As we can see the transactions are still not very clean, and we should also compartmentalize each transaction according to dates, transaction description, and transactional amount so we can then easily write them into a spreadsheet later. Storing the transactions as a list will help accomplish this. We first examine whitespace characters within the string to see how we can split the string accordingly:
+So far so good! With just a few blocks of code we have managed to store transactions in a string. However, we want to accomplish more here. As we can see, the transactions are still not very clean, and we should also compartmentalize each transaction according to dates, transaction description, and transactional amount so we can then easily write them into a spreadsheet later. Storing the transactions as a list will help accomplish this. We first examine whitespace characters within the string to see how we can split the string accordingly:
 
 {% highlight ruby %}
 print(repr(first_page_txns_raw))
@@ -112,7 +112,7 @@ pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
 
 ![_config.yml]({{ site.baseurl }}/images/DBS_clean_fp_txns.png)
 
-The process is almost the same for UOB's sample statement as it's fairly similar to DBS's, apart from three major differences. Firstly, there's an extra footnote that lies at the end of every page, so transactions are wrapped between the fixed header "PREVIOUS BALANCE" and the footnote (that starts with "Pleasenote"). Therefore, we can extract the transactions by taking whatever that comes between the header and footnote, with the following code:
+The process is almost the same for UOB's sample statement as it's fairly similar to DBS's, apart from three major differences. Firstly, the fixed headers and footers are different, so we will need another set of code to pull transactions from the first page of UOB's statements:
 
 {% highlight ruby %}
 with pdfplumber.open(uob_source_dir / uob_pdf_file) as pdf:
@@ -139,7 +139,7 @@ pprint.pprint(filter_legitimate_txns(first_page_txns_raw))
 
 ![_config.yml]({{ site.baseurl }}/images/UOB_clean_fp_txns.png)
 
-Last but not least, UOB posts each transaction in two dates; one being the post date and the other being the transaction date. The post dates will be removed as we're only concerned with the latter.
+Last but not least, UOB posts each transaction in two dates; one being the post date and the other being the transacted date. The post dates will be removed as we're only concerned with the latter.
 
 {% highlight ruby %}
 first_page_txns_processed = filter_legitimate_txns(first_page_txns_raw)
@@ -151,7 +151,7 @@ pprint.pprint(first_page_txns_processed)
 
 ![_config.yml]({{ site.baseurl }}/images/UOB_processed_fp_txns.png)
 
-So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all statements. As mentioned earlier, the end of a transactional listing can be identified by either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched words so we can partition the transactions in *txn_trimming* function (so far we've already partitioned the transactions in the first page of each statement, and we're generalizing this operation in this function where it aims to partition transactions in all pages).
+So far we've managed to successfully extract all clean transactions from each bank statement's first page. However, these transactions can extend to the next if one decides to be more generous and splurge more on a given month! Therefore, we need to expand on our code base to ensure complete transaction extraction from all pages. In both banks, any list of transactions ends with either "SUB-TOTAL" (in DBS) or "SUB TOTAL" (in UOB), so we first define a function that returns True if a page contains these and False otherwise. We shall also store the returned matched words so we can partition the transactions in *txn_trimming* function (so far we've already partitioned the transactions in the first page of each statement, and we're generalizing this operation in this function where it aims to partition transactions in all pages).
 
 {% highlight ruby %}
 sub_total_regex = re.compile("SUB.TOTAL")
@@ -191,8 +191,6 @@ def process_txn_amt(txns):
             
     return txns
 {% endhighlight %}
-
-When a list of transactions is passed as an argument, the function will check if each transaction ends with either a floating-point number or the letters "CR". If it doesn't, it removes the last characters until either condition is satisfied. Furthermore, for those transactions that end with the letters "CR", the letters are removed and a negative sign is added in front.
 
 My source directory contains the entire 2020 statements from both DBS and UOB. Putting all the pieces together, running the above codes on all the files will give all 2020 transactions:
 
@@ -248,7 +246,7 @@ categorized_txns = [{"Date": " ".join(txn[0:2]), "Txn Desc": " ".join(txn[2:len(
 ![_config.yml]({{ site.baseurl }}/images/categorized_txns.png)
 
 ## Write Into .csv
-The above transactions are first converted into a pandas dataframe to allow for easier further manipulation to the data and subsequent writing into a csv file.
+The above transactions are first converted into a pandas dataframe to allow for easier manipulation to the data and subsequent writing into a csv file.
 
 Adding cateogories to each transaction then requires the following code:
 
@@ -314,9 +312,16 @@ Lastly, the dataframe is written into a csv file to prepare for analysis:
 df_categorized_txns.to_csv(dest_csv / "2020 transactions.csv")
 {% endhighlight %}
 ## Analyze Expenses
-We finally have a clean dataset to analyze the expenses. The resulting csv file is uploaded in Tableau Public to generate the dashboard [here](https://public.tableau.com/profile/jerome.ko#!/vizhome/2020ExpenseAnalysis/Dashboard1?publish=yes).
+We finally have a clean dataset to analyze the expenses. The resulting csv file is uploaded in Tableau Public to generate the dashboard [here](https://public.tableau.com/profile/jerome.ko#!/vizhome/2020ExpenseAnalysis/Dashboard1?publish=yes). Multiple conclusions can be made from this set of data.
 
 ![_config.yml]({{ site.baseurl }}/images/expense_dashboard.png)
+
+### Overall Balance
+A positive balance of $891 seems to suggest that 2020 is a rather frugal year for me, as I'd successfully managed to keep my expenses well below my budget. However, drawing such conclusions from a simple numerical measure can prove to be erroneous as spending might be highly concentrated on just a few categories such that the allocated budgets for other categories lessen the negative balances in these dominant ones. This phenomenon is apparent in this dashboard; up to an astonishing 91% of all expenses was spent on just food and shopping. This means that any fluctuation in just these 2 categories will lead to large swings in the overall health of the balance sheet, highlighting the importance of controlling the amount spent on these key cateogories to avoid being in the red.
+
+If we look at how well each category spending fares in comparison to its corresponding budget, it is the same 2 categories that performed the worse. Spending on food is at 146% of its allocated budget, while shopping expense has exceeded the budget by almost 500%! The purchase of a new laptop explains the poor performance in the latter though (covering 64% of all shopping expenses), and performance here is rather subjective as the laptop purchase was a necessary evil because it is meant to be used for educational purposes.
+
+Holiday category sees the best performance with cost savings at an impressive figure of 97%. However, I wouldn't see this as positive news as it was a mere result of circumstances, rather than an effortful control and monitoring of its budget. With COVID-19, most countries were forced to close its borders and suspend international travel, so travelling during the year wasn't even possible. 
 
 <!-- 
 Talk about budget first
@@ -327,11 +332,9 @@ Cumulative line graph for each category vs benchmark/budget
 Monthly growth rate
 
 Interesting findings:
-1. Seemingly healthy, positive balance: Spent $891 less than total budget; this is not great news esp when one should be saving more during COVID!
-2. Above is bad too because we're not considering non-card transactions - Expense is prob more
-3. Txn freq doesn't correlate to total txn amt; holiday season saw the highest transactional count but amt is fairly stable around monthly average
-4. Breaking budget and expenses down into categorical level proves to be very helpful; even though overall balance is negative we can clearly see that we're spending too much on food; 2x more than allocated budget!
-5. May is the season of spending; inflated because bought a personal Macbook for myself. Perhaps still the best investment made as I've been using it to hone my programming skills
+1. Above is bad too because we're not considering non-card transactions - Expense is prob more
+2. Txn freq doesn't correlate to total txn amt; holiday season saw the highest transactional count but amt is fairly stable around monthly average
+3. May is the season of spending; inflated because bought a personal Macbook for myself. Perhaps still the best investment made as I've been using it to hone my programming skills
 
 Takeaway:
 1. Try to contain all transactions in cards, so tracking is more accurate
