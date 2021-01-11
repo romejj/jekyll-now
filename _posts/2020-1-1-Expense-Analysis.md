@@ -324,7 +324,7 @@ Holiday category sees the best performance with cost savings at an impressive fi
 
 Another interesting observation can be made when categorical transactions are viewed in a time series. It is no coincidence that April, May and June witness the lowest spending in food, while at the same time shopping expenses exploded out of proportion. These months coincide with the Singapore's circuit breaker period, when the country was under partial lockdown and all citizens placed under stay-at-home order. Restaurant dining came to a halt while entertainment was channeled towards online shopping. 
 
- ## Conclusion
+## Conclusion
 2020 is an abnormal year. The onslaught of COVID-19 has taken the world by surprise, and people have said that it has changed the way we live, work and play. This deviance from normalcy also applies to one's spending behaviour, and this dashboard may paint an entirely different picture in an alternate reality where COVID-19 didn't exist. However, 2021 may be no different as societies take time to adjust to the new normal, so perhaps it's safe to assume that this year's spending patterns are going to be similar than last year's. Therefore, the most important takeaway from all this is to start exercising prudent spending on food, while also tightening the budget for holidays as travel restrictions are likely to continue for most part of the new year.
 
 Thank you for reading until the end. The full set of codes has been published to my [repository](https://github.com/romejj/personal/blob/master/expense_analysis/pdf_parser.py) for those who are interested.
