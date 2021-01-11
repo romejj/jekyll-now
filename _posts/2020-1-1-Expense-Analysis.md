@@ -316,29 +316,18 @@ We finally have a clean dataset to analyze the expenses. The resulting csv file 
 
 ![_config.yml]({{ site.baseurl }}/images/expense_dashboard.png)
 
-### Overall Balance
-A positive balance of $891 seems to suggest that 2020 is a rather frugal year for me, as I'd successfully managed to keep my expenses well below my budget. However, drawing such conclusions from a simple numerical measure can prove to be erroneous as spending might be highly concentrated on just a few categories such that the allocated budgets for other categories lessen the negative balances in these dominant ones. This phenomenon is apparent in this dashboard; up to an astonishing 91% of all expenses was spent on just food and shopping. This means that any fluctuation in just these 2 categories will lead to large swings in the overall health of the balance sheet, highlighting the importance of controlling the amount spent on these key cateogories to avoid being in the red.
+A positive balance of $1,872 seems to suggest that 2020 is a rather frugal year for me, as I'd successfully managed to keep my expenses well below my budget. However, drawing such conclusions from a simple numerical measure can prove to be erroneous as spending might be highly concentrated on just a few categories such that the allocated budgets for other categories lessen the negative balances in these dominant ones. This phenomenon is apparent in this dashboard; up to an astonishing 90% of all expenses was spent on just food and shopping. This means that any fluctuation in just these 2 categories will lead to large swings in the overall health of the balance sheet, highlighting the importance of controlling the amount spent on these key cateogories to avoid being in the red.
 
-If we look at how well each category spending fares in comparison to its corresponding budget, it is the same 2 categories that performed the worse. Spending on food is at 146% of its allocated budget, while shopping expense has exceeded the budget by almost 500%! The purchase of a new laptop explains the poor performance in the latter though (covering 64% of all shopping expenses), and performance here is rather subjective as the laptop purchase was a necessary evil because it is meant to be used for educational purposes.
+If we look at how well each category spending fares in comparison to its corresponding budget, it is the same 2 categories that performed the worse. Spending on food is at 108% of its allocated budget, while shopping expense has exceeded the budget by 8 times! The purchase of a new laptop (MacBook Pro, which costs $1,884) explains the poor performance in the latter though (covering 40% of all shopping expenses), and performance here is rather subjective as the laptop purchase was a necessary evil because it is meant to be used for educational purposes.
 
-Holiday category sees the best performance with cost savings at an impressive figure of 97%. However, I wouldn't see this as positive news as it was a mere result of circumstances, rather than an effortful control and monitoring of its budget. With COVID-19, most countries were forced to close its borders and suspend international travel, so travelling during the year wasn't even possible. 
+Holiday category sees the best performance with cost savings at an impressive figure of 97%. However, I wouldn't see this as positive news as it was a mere result of circumstances, rather than an effortful control and monitoring of its budget. With COVID-19, most countries were forced to close its borders and suspend international travel, so travelling during the year wasn't even possible.
 
+Another interesting observation can be made when categorical transactions are viewed in a time series. It is no coincidence that April, May and June witness the lowest spending in food, while at the same time shopping expenses exploded out of proportion. These months coincide with the Singapore's circuit breaker period, when the country was under partial lockdown and all citizens placed under stay-at-home order. Restaurant dining came to a halt while entertainment was channeled towards online shopping. 
+
+ ## Conclusion
+2020 is an abnormal year. The onslaught of COVID-19 has taken the world by surprise, and people have said that it has changed the way we live, work and play. This deviance from normalcy also applies to one's spending behaviour, and this dashboard may paint an entirely different picture in an alternate reality where COVID-19 didn't exist. However, 2021 may be no different as societies take time to adjust to the new normal, so perhaps it's safe to assume that this year's spending patterns are going to be similar than last year's. Therefore, the most important takeaway from all this is to start exercising prudent spending on food, while also tightening the budget for holidays as travel restrictions are likely to continue for most part of the new year.
+
+Thank you for reading until the end. The full set of codes has been published to my [repository](https://github.com/romejj/personal/blob/master/expense_analysis/pdf_parser.py) for those who are interested.
 <!-- 
-Talk about budget first
-Check month on month expenditure and count of transactions (on those periods of high txns, do we see high amt too?)
-Check counts of each category per month (interesting to see which months are the most fun by looking at count of entertainment)
 Check highest occurrence for each string
-Cumulative line graph for each category vs benchmark/budget
-Monthly growth rate
-
-Interesting findings:
-1. Above is bad too because we're not considering non-card transactions - Expense is prob more
-2. Txn freq doesn't correlate to total txn amt; holiday season saw the highest transactional count but amt is fairly stable around monthly average
-3. May is the season of spending; inflated because bought a personal Macbook for myself. Perhaps still the best investment made as I've been using it to hone my programming skills
-
-Takeaway:
-1. Try to contain all transactions in cards, so tracking is more accurate
- -->
-
-<!-- Code can be found here.
-Tableau dashboard can be found here. -->
+Monthly growth rate -->
